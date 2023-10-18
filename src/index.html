@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Chat</title>
+    <meta
+      name="description"
+      content="Este é um chat web com input e botão de enviar mensagem."
+    />
+    <meta name="keywords" content="chat, web, input, botão, mensagem" />
+    <meta name="author" content="Seu nome ou nome da empresa" />
+    <meta property="og:title" content="Web Chat" />
+    <meta
+      property="og:description"
+      content="Este é um chat web com input e botão de enviar mensagem."
+    />
+    <meta property="og:image" content="https://exemplo.com/imagem.jpg" />
+    <meta property="og:url" content="https://exemplo.com/chat" />
+    <meta name="twitter:title" content="Web Chat" />
+    <meta
+      name="twitter:description"
+      content="Este é um chat web com input e botão de enviar mensagem."
+    />
+    <meta name="twitter:image" content="https://exemplo.com/imagem.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Adicionando Tailwind CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.7/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+    ></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  </head>
+
+  <body class="bg-gray-900 text-white">
+    <div id="acesso_usuario">
+      <form id="login" class="max-w-md mx-auto mt-10">
+        <div class="mb-4">
+          <label
+            class="block text-gray-200 text-sm font-bold mb-2"
+            for="apelido"
+          >
+            Apelido do usuário:
+          </label>
+          <input
+            class="appearance-none bg-gray-800 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
+            id="apelido"
+            name="apelido"
+            type="text"
+            placeholder="Digite o apelido do usuário"
+          />
+        </div>
+        <div class="flex justify-center">
+          <button
+            class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            type="submit"
+            value="entrar"
+          >
+            entrar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div
+      id="sala_chat"
+      class="bg-gray-900 absolute bottom-0 w-full mx-auto px-4 py-10"
+    >
+      <div class="w-10/12 mx-auto overflow-auto max-h-96 md:max-h-64">
+        <div id="historico_mensagens"></div>
+      </div>
+
+      <form id="chat" class="md:max-w-lg mx-auto mt-6">
+        <label class="block mb-2" for="message">Digite sua mensagem:</label>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+          <input
+            class="flex-1 px-4 py-2 rounded-md bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            type="text"
+            id="texto_mensagem"
+            name="texto_mensagem"
+            placeholder="Digite aqui..."
+          />
+          <button
+            class="w-full sm:w-auto px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            type="submit"
+          >
+            Enviar mensagem!
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script type="text/javascript">
+      console.log("Iniciando chat.js...");
+      var socket = io.connect();
+      
+        const red = Math.floor(Math.random() * 256);
+        const green = Math.floor(Math.random() * 256);
+        const blue = Math.floor(Math.random() * 256);   
+
+      $("form#chat").submit(function (e) {
+        e.preventDefault();
+        socket.emit(
+          "enviar mensagem",
+          $(this).find("#texto_mensagem").val(),
+          function () {
+            $("form#chat #texto_mensagem").val("");
+          }
+        );
+      });
+
+      socket.on("atualizar mensagens", function (mensagem) {
+        let mensagem_formatada = $("<p />").text(mensagem).addClass(`text-purple-500`);
+        $("#historico_mensagens").append(mensagem_formatada);
+      });
+    </script>
+
+    <script type="text/javascript">
+      $("#sala_chat").hide();
+      $("form#login").submit(function (e) {
+        e.preventDefault();
+
+        socket.emit(
+          "entrar",
+          $(this).find("#apelido").val(),
+          function (valido) {
+            if (valido) {
+              $("#acesso_usuario").hide();
+              $("#sala_chat").show();
+            } else {
+              $("#acesso_usuario").val("");
+              alert("Nome já utilizado nesta sala");
+            }
+          }
+        );
+      });
+    </script>
+  </body>
+</html>
